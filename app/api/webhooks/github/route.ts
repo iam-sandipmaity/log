@@ -30,6 +30,14 @@ export async function POST(request: Request) {
 
     const payload = JSON.parse(body)
 
+    // Handle ping event (webhook test)
+    if (event === 'ping') {
+      return NextResponse.json(
+        { message: 'Webhook configured successfully! 🎉' },
+        { status: 200 }
+      )
+    }
+
     // Normalize the GitHub event
     const normalizedEvent = normalizeGitHubEvent(event!, payload)
 
