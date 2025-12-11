@@ -4,13 +4,13 @@
 -- Insert all your repositories
 INSERT INTO repos (name, url, icon) VALUES
   ('iam-sandipmaity/SnapTools', 'https://github.com/iam-sandipmaity/SnapTools', 'https://avatars.githubusercontent.com/u/iam-sandipmaity'),
+  ('iam-sandipmaity/log', 'https://github.com/iam-sandipmaity/log', 'https://avatars.githubusercontent.com/u/iam-sandipmaity'),
   ('iam-sandipmaity/CryptoTracker', 'https://github.com/iam-sandipmaity/CryptoTracker', 'https://avatars.githubusercontent.com/u/iam-sandipmaity'),
   ('iam-sandipmaity/mftracker', 'https://github.com/iam-sandipmaity/mftracker', 'https://avatars.githubusercontent.com/u/iam-sandipmaity'),
   ('iam-sandipmaity/WeatherWise', 'https://github.com/iam-sandipmaity/WeatherWise', 'https://avatars.githubusercontent.com/u/iam-sandipmaity'),
   ('iam-sandipmaity/sandip', 'https://github.com/iam-sandipmaity/sandip', 'https://avatars.githubusercontent.com/u/iam-sandipmaity'),
-  ('iam-sandipmaity/weather', 'https://github.com/iam-sandipmaity/weather', 'https://avatars.githubusercontent.com/u/iam-sandipmaity'),
   ('iam-sandipmaity/download', 'https://github.com/iam-sandipmaity/download', 'https://avatars.githubusercontent.com/u/iam-sandipmaity'),
-  ('iam-sandipmaity/newportfolio', 'https://github.com/iam-sandipmaity/newportfolio', 'https://avatars.githubusercontent.com/u/iam-sandipmaity')
+  ('iam-sandipmaity/Runr', 'https://github.com/iam-sandipmaity/Runr', 'https://avatars.githubusercontent.com/u/iam-sandipmaity')
 ON CONFLICT (name) DO NOTHING;
 
 -- Note: No sample events inserted
