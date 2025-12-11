@@ -55,11 +55,12 @@ export async function POST(request: Request) {
       icon: payload.repository.owner.avatar_url,
     }
 
-    const { data: existingRepo } = await (supabaseAdmin as any)
+    // Check if repo exists (maybeSingle doesn't error if not found)
+    const { data: existingRepo, error: repoFindError } = await (supabaseAdmin as any)
       .from('repos')
       .select('id')
       .eq('name', repoData.name)
-      .single()
+      .maybeSingle()
 
     let repoId = existingRepo?.id
 
@@ -73,7 +74,7 @@ export async function POST(request: Request) {
       if (repoError) {
         console.error('Failed to create repo:', repoError)
         return NextResponse.json(
-          { error: 'Failed to create repository' },
+          { error: 'Failed to create repository', details: repoError.message },
           { status: 500 }
         )
       }
@@ -87,19 +88,20 @@ export async function POST(request: Request) {
       repo_id: repoId,
     }
 
-    const { error: eventError } = await (supabaseAdmin as any)
+    const { data: insertedEvent, error: eventError } = await (supabaseAdmin as any)
       .from('events')
       .insert([eventData])
+      .select()
 
     if (eventError) {
       console.error('Failed to create event:', eventError)
       return NextResponse.json(
-        { error: 'Failed to create event' },
+        { error: 'Failed to create event', details: eventError.message },
         { status: 500 }
       )
     }
 
-    return NextResponse.json({ success: true }, { status: 201 })
+    return NextResponse.json({ success: true, event: insertedEvent }, { status: 201 })
   } catch (error) {
     console.error('Webhook processing error:', error)
     return NextResponse.json(
