@@ -1,14 +1,23 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { verifyAdminToken } from '@/lib/auth'
 import type { Event } from '@/types'
 
 // This ensures the route is not statically generated
 export const dynamic = 'force-dynamic'
 
 export async function PATCH(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Verify authentication
+  if (!verifyAdminToken(request)) {
+    return NextResponse.json(
+      { error: 'Unauthorized. Admin authentication required.' },
+      { status: 401 }
+    )
+  }
+
   try {
     const { id } = await params
     const body = await request.json() as Partial<Event>
@@ -34,9 +43,17 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Verify authentication
+  if (!verifyAdminToken(request)) {
+    return NextResponse.json(
+      { error: 'Unauthorized. Admin authentication required.' },
+      { status: 401 }
+    )
+  }
+
   try {
     const { id } = await params
     const { error } = await supabaseAdmin
