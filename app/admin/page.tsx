@@ -2,16 +2,64 @@
 
 import { useEffect, useState } from 'react'
 import { Event } from '@/types'
-import { Trash2, Edit2, Pin, Check, X } from 'lucide-react'
+import { Trash2, Edit2, Pin, Check, X, Lock } from 'lucide-react'
 
 export default function AdminPage() {
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved'>('all')
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [password, setPassword] = useState('')
+  const [authError, setAuthError] = useState('')
+  const [token, setToken] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchEvents()
-  }, [filter])
+    // Check if token exists in localStorage
+    const savedToken = localStorage.getItem('adminToken')
+    if (savedToken) {
+      setToken(savedToken)
+      setIsAuthenticated(true)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchEvents()
+    }
+  }, [filter, isAuthenticated])
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setAuthError('')
+
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setToken(data.token)
+        setIsAuthenticated(true)
+        localStorage.setItem('adminToken', data.token)
+        setPassword('')
+      } else {
+        setAuthError(data.error || 'Authentication failed')
+      }
+    } catch (error) {
+      setAuthError('Failed to authenticate')
+    }
+  }
+
+  const handleLogout = () => {
+    setIsAuthenticated(false)
+    setToken(null)
+    localStorage.removeItem('adminToken')
+    setEvents([])
+  }
 
   const fetchEvents = async () => {
     try {
@@ -29,12 +77,23 @@ export default function AdminPage() {
   }
 
   const updateEvent = async (id: string, updates: Partial<Event>) => {
+    if (!token) return
+
     try {
       const response = await fetch(`/api/events/${id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
         body: JSON.stringify(updates),
       })
+
+      if (response.status === 401) {
+        setAuthError('Session expired. Please login again.')
+        handleLogout()
+        return
+      }
 
       if (response.ok) {
         fetchEvents()
@@ -45,12 +104,22 @@ export default function AdminPage() {
   }
 
   const deleteEvent = async (id: string) => {
+    if (!token) return
     if (!confirm('Are you sure you want to delete this event?')) return
 
     try {
       const response = await fetch(`/api/events/${id}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
       })
+
+      if (response.status === 401) {
+        setAuthError('Session expired. Please login again.')
+        handleLogout()
+        return
+      }
 
       if (response.ok) {
         fetchEvents()
@@ -60,11 +129,58 @@ export default function AdminPage() {
     }
   }
 
+  // Show login form if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+          <div className="flex items-center justify-center mb-6">
+            <Lock className="w-12 h-12 text-accent" />
+          </div>
+          <h1 className="text-2xl font-bold text-center mb-6">Admin Login</h1>
+          <form onSubmit={handleLogin}>
+            <div className="mb-4">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+                placeholder="Enter admin password"
+                required
+              />
+            </div>
+            {authError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
+                {authError}
+              </div>
+            )}
+            <button
+              type="submit"
+              className="w-full bg-accent text-white py-2 px-4 rounded-md hover:bg-accent/90 transition-colors"
+            >
+              Login
+            </button>
+          </form>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 text-sm bg-gray-200 hover:bg-gray-300 rounded transition-colors"
+          >
+            Logout
+          </button>
         </div>
       </header>
 
