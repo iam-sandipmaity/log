@@ -8,6 +8,8 @@ A **minimal, auto-updating development activity log** that displays all your Git
 
 ### For Visitors
 - **Unified Timeline** - See commits, releases, PRs, and updates all in one place
+- **Detailed Event View** - Click any event to see complete commit details
+- **Code Diff Viewer** - GitHub-style diffs with syntax highlighting for all file changes
 - **Smart Filtering** - Filter by repo, event type, or date
 - **Clean Design** - Minimal, professional UI matching sandipmaity.me style
 - **Auto-Generated** - No manual updates needed

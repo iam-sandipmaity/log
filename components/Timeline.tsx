@@ -2,19 +2,29 @@
 
 import { useEffect, useState } from 'react'
 import EventCard from './EventCard'
-import { Event } from '@/types'
+import { Event, EventType } from '@/types'
 
-export default function Timeline() {
+interface TimelineProps {
+  selectedRepo: string
+  selectedType: EventType | ''
+}
+
+export default function Timeline({ selectedRepo, selectedType }: TimelineProps) {
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetchEvents()
-  }, [])
+  }, [selectedRepo, selectedType])
 
   const fetchEvents = async () => {
     try {
-      const response = await fetch('/api/events')
+      const params = new URLSearchParams()
+      if (selectedRepo) params.append('repo', selectedRepo)
+      if (selectedType) params.append('type', selectedType)
+      
+      const url = `/api/events${params.toString() ? '?' + params.toString() : ''}`
+      const response = await fetch(url)
       const data = await response.json()
       setEvents(data)
     } catch (error) {

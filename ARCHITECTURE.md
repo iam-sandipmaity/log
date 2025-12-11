@@ -80,8 +80,20 @@
 │  │  ├─ Hero                                               │ │
 │  │  ├─ Filters (repo, type, date)                        │ │
 │  │  ├─ Timeline (approved events only)                   │ │
-│  │  │   └─ EventCard (×N)                                │ │
+│  │  │   └─ EventCard (×N) → Click → Event Detail         │ │
 │  │  └─ Footer                                             │ │
+│  └────────────────────────────────────────────────────────┘ │
+│                                                              │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │  Event Detail Page (/events/[id])                     │ │
+│  │  ├─ Full event information                            │ │
+│  │  ├─ Commit statistics                                 │ │
+│  │  ├─ List of all commits (if multiple)                │ │
+│  │  ├─ DiffViewer component (×N files)                  │ │
+│  │  │   ├─ File name and status                         │ │
+│  │  │   ├─ Additions/deletions count                    │ │
+│  │  │   └─ Expandable code diff with highlighting       │ │
+│  │  └─ Link to GitHub                                    │ │
 │  └────────────────────────────────────────────────────────┘ │
 │                                                              │
 │  ┌────────────────────────────────────────────────────────┐ │

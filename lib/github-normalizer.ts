@@ -36,6 +36,11 @@ export function normalizeGitHubEvent(event: string, payload: any) {
         return normalizePRMergeEvent(payload)
       }
       return null
+    case 'issues':
+      if (payload.action === 'opened') {
+        return normalizeIssueEvent(payload)
+      }
+      return null
     default:
       return null
   }
@@ -94,6 +99,22 @@ function normalizePRMergeEvent(payload: any) {
     timestamp: pr.merged_at,
     source_url: pr.html_url,
     tags: extractTags(`${pr.title} ${pr.body || ''}`),
+    status: 'approved',
+    pinned: false,
+  }
+}
+
+function normalizeIssueEvent(payload: any) {
+  const issue = payload.issue
+
+  return {
+    type: 'issue' as EventType,
+    title: `Issue #${issue.number}: ${issue.title}`,
+    summary: issue.body?.slice(0, 300) || 'New issue opened',
+    body: issue.body || '',
+    timestamp: issue.created_at,
+    source_url: issue.html_url,
+    tags: ['issue', ...extractTags(`${issue.title} ${issue.body || ''}`)],
     status: 'approved',
     pinned: false,
   }

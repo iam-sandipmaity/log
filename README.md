@@ -5,11 +5,13 @@ A minimal, clean, professional site that automatically displays all repository c
 ## Features
 
 - **Unified Timeline**: View commits, releases, PR merges, and repository updates in one place
+- **Detailed Event View**: Click any event to see full commit details with code diffs
+- **Code Diff Viewer**: GitHub-style diff display with syntax highlighting
 - **Clean UI**: Minimal design with smooth animations and hover effects
 - **Smart Filtering**: Filter by repository, event type, or date range
 - **Auto-Generated Summaries**: Automatic tagging and summarization of events
 - **Admin Dashboard**: Moderate, edit, pin, or delete events
-- **GitHub Integration**: Webhook support with polling fallback
+- **GitHub Integration**: Webhook support with direct API integration
 - **Real-time Updates**: Instant display of new repository activity
 
 ## Tech Stack
@@ -89,13 +91,18 @@ githublog/
 ├── app/
 │   ├── api/
 │   │   ├── events/          # Event CRUD operations
+│   │   │   └── [id]/
+│   │   │       └── details/ # Fetch event details from GitHub
 │   │   ├── repos/           # Repository management
 │   │   └── webhooks/        # GitHub webhook handler
 │   ├── admin/               # Admin dashboard
+│   ├── events/
+│   │   └── [id]/            # Event detail page with diffs
 │   ├── layout.tsx           # Root layout
 │   ├── page.tsx             # Home page
 │   └── globals.css          # Global styles
 ├── components/
+│   ├── DiffViewer.tsx       # Code diff display component
 │   ├── EventCard.tsx        # Timeline event card
 │   ├── Filters.tsx          # Filter controls
 │   ├── Footer.tsx           # Page footer
