@@ -164,8 +164,8 @@ export default function EventDetailPage() {
           )}
         </div>
 
-        {/* Commit Details */}
-        {details && (
+        {/* Commit Details - Only show for commit types (not releases, PRs, or issues) */}
+        {details && !['release', 'pr_merge', 'pr_closed', 'issue', 'issue_closed'].includes(event.type) && (
           <>
             {/* Stats */}
             <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
@@ -207,18 +207,28 @@ export default function EventDetailPage() {
             </div>
 
             {/* Commits List */}
-            {details.commits.length > 1 && (
+            {details.commits.length > 0 && (
               <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Commits</h2>
-                <div className="space-y-3">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  Commits {details.commits.length > 1 && `(${details.commits.length})`}
+                </h2>
+                <div className="space-y-4">
                   {details.commits.map((commit) => (
-                    <div key={commit.sha} className="border-l-2 border-blue-500 pl-4">
-                      <div className="font-mono text-sm text-gray-600 dark:text-gray-400 mb-1">
-                        {commit.sha.substring(0, 7)}
+                    <div key={commit.sha} className="border-l-4 border-blue-500 dark:border-blue-400 pl-4 py-2">
+                      <div className="flex items-center gap-2 mb-2">
+                        <a
+                          href={commit.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                          title="View commit on GitHub"
+                        >
+                          {commit.sha.substring(0, 7)}
+                        </a>
                       </div>
                       <MarkdownRenderer
                         content={commit.message.split('\n')[0]}
-                        className="text-gray-900 dark:text-white font-medium prose prose-sm dark:prose-invert max-w-none [&>*]:inline [&>*:first-child]:mt-0 [&>*:last-child]:mb-0"
+                        className="text-gray-900 dark:text-white font-medium prose prose-sm dark:prose-invert max-w-none [&>*]:inline [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 mb-2"
                       />
                       <div className="text-sm text-gray-600 dark:text-gray-400">
                         {commit.author.name} • {new Date(commit.author.date).toLocaleString()}
@@ -248,6 +258,102 @@ export default function EventDetailPage() {
               </div>
             </div>
           </>
+        )}
+
+        {/* Pull Request Information - Only for PR events */}
+        {(event.type === 'pr_merge' || event.type === 'pr_closed') && (
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Pull Request Information</h2>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-32">PR Number:</span>
+                <a
+                  href={event.source_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-mono text-lg text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+                >
+                  #{event.source_url.match(/pull\/(\d+)/)?.[1] || 'View PR'}
+                </a>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-32">Status:</span>
+                <span className={`px-3 py-1 text-sm rounded-full ${event.type === 'pr_merge'
+                    ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
+                  }`}>
+                  {event.type === 'pr_merge' ? 'Merged' : 'Closed'}
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-32">Date:</span>
+                <span className="text-sm text-gray-900 dark:text-white">
+                  {new Date(event.timestamp).toLocaleString()}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Issue Information - Only for issue events */}
+        {(event.type === 'issue' || event.type === 'issue_closed') && (
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Issue Information</h2>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-32">Issue Number:</span>
+                <a
+                  href={event.source_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-mono text-lg text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+                >
+                  #{event.source_url.match(/issues\/(\d+)/)?.[1] || 'View Issue'}
+                </a>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-32">Status:</span>
+                <span className={`px-3 py-1 text-sm rounded-full ${event.type === 'issue_closed'
+                    ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200'
+                    : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200'
+                  }`}>
+                  {event.type === 'issue_closed' ? 'Closed' : 'Open'}
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-32">Date:</span>
+                <span className="text-sm text-gray-900 dark:text-white">
+                  {new Date(event.timestamp).toLocaleString()}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Release Information - Only for release events */}
+        {event.type === 'release' && (
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Release Information</h2>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-32">Release Tag:</span>
+                <a
+                  href={event.source_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-mono text-lg text-blue-600 dark:text-blue-400 hover:underline font-semibold"
+                >
+                  {event.source_url.split('/').pop() || 'View Release'}
+                </a>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-400 w-32">Date:</span>
+                <span className="text-sm text-gray-900 dark:text-white">
+                  {new Date(event.timestamp).toLocaleString()}
+                </span>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* View on GitHub */}
