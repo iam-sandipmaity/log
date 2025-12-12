@@ -2,6 +2,7 @@ import { Event } from '@/types'
 import { formatDistanceToNow } from 'date-fns'
 import { GitCommit, GitPullRequest, Tag, Settings, AlertCircle, XCircle, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
+import MarkdownRenderer from './MarkdownRenderer'
 
 interface EventCardProps {
   event: Event
@@ -38,7 +39,7 @@ export default function EventCard({ event }: EventCardProps) {
           <div className={`mt-1 ${iconColor}`}>
             <Icon size={24} />
           </div>
-          
+
           <div className="flex-grow">
             <div className="flex items-start justify-between mb-2">
               <div>
@@ -58,7 +59,13 @@ export default function EventCard({ event }: EventCardProps) {
               )}
             </div>
 
-            <p className="text-gray-600 mb-4">{event.summary}</p>
+            <div className="line-clamp-3 mb-4">
+              <MarkdownRenderer
+                content={event.summary}
+                className="text-gray-600 prose prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0"
+                disableLinks={true}
+              />
+            </div>
 
             <div className="flex flex-wrap items-center gap-3 text-sm">
               <time className="text-gray-500">
