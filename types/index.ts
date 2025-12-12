@@ -19,6 +19,8 @@ export interface Event {
   body?: string
   timestamp: string
   source_url: string
+  github_delivery_id?: string
+  github_event_id?: string
   tags: string[]
   status: EventStatus
   pinned: boolean

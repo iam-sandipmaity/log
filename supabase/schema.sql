@@ -17,11 +17,14 @@ CREATE TABLE IF NOT EXISTS events (
   body TEXT,
   timestamp TIMESTAMPTZ NOT NULL,
   source_url TEXT NOT NULL,
+  github_delivery_id TEXT,
+  github_event_id TEXT,
   tags TEXT[] DEFAULT '{}',
   status TEXT DEFAULT 'approved' CHECK (status IN ('pending', 'approved', 'rejected')),
   pinned BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(repo_id, github_event_id, type)
 );
 
 -- Create indexes for better query performance
@@ -30,6 +33,8 @@ CREATE INDEX IF NOT EXISTS idx_events_timestamp ON events(timestamp DESC);
 CREATE INDEX IF NOT EXISTS idx_events_status ON events(status);
 CREATE INDEX IF NOT EXISTS idx_events_type ON events(type);
 CREATE INDEX IF NOT EXISTS idx_events_pinned ON events(pinned);
+CREATE INDEX IF NOT EXISTS idx_events_github_delivery_id ON events(github_delivery_id);
+CREATE INDEX IF NOT EXISTS idx_events_github_event_id ON events(github_event_id);
 
 -- Create function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
