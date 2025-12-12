@@ -64,11 +64,27 @@ export default function AdminPage() {
   }
 
   const fetchEvents = async () => {
+    if (!token) {
+      handleLogout()
+      return
+    }
+
     try {
       const url = filter === 'all'
         ? '/api/events?status=pending,approved'
         : `/api/events?status=${filter}`
-      const response = await fetch(url)
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+
+      if (response.status === 401) {
+        setAuthError('Session expired. Please login again.')
+        handleLogout()
+        return
+      }
+
       const data = await response.json()
       setEvents(data)
     } catch (error) {
