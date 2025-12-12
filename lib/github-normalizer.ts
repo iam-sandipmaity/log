@@ -88,7 +88,7 @@ function normalizeReleaseEvent(payload: any) {
     source_url: release.html_url,
     tags: ['release', ...extractTags(release.body || '')],
     status: 'approved',
-    pinned: true,
+    pinned: false,
   }
 }
 
