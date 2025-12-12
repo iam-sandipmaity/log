@@ -12,8 +12,10 @@ export default function AdminPage() {
   const [password, setPassword] = useState('')
   const [authError, setAuthError] = useState('')
   const [token, setToken] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     // Check if token exists in localStorage
     const savedToken = localStorage.getItem('adminToken')
     if (savedToken) {
@@ -62,11 +64,27 @@ export default function AdminPage() {
   }
 
   const fetchEvents = async () => {
+    if (!token) {
+      handleLogout()
+      return
+    }
+
     try {
-      const url = filter === 'all' 
+      const url = filter === 'all'
         ? '/api/events?status=pending,approved'
         : `/api/events?status=${filter}`
-      const response = await fetch(url)
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+
+      if (response.status === 401) {
+        setAuthError('Session expired. Please login again.')
+        handleLogout()
+        return
+      }
+
       const data = await response.json()
       setEvents(data)
     } catch (error) {
@@ -127,6 +145,15 @@ export default function AdminPage() {
     } catch (error) {
       console.error('Failed to delete event:', error)
     }
+  }
+
+  // Prevent hydration mismatch by waiting for client-side mount
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-pulse text-gray-400">Loading...</div>
+      </div>
+    )
   }
 
   // Show login form if not authenticated
@@ -190,11 +217,10 @@ export default function AdminPage() {
             <button
               key={f}
               onClick={() => setFilter(f as any)}
-              className={`px-4 py-2 rounded ${
-                filter === f
+              className={`px-4 py-2 rounded ${filter === f
                   ? 'bg-accent text-white'
                   : 'bg-white text-gray-700 border'
-              }`}
+                }`}
             >
               {f.charAt(0).toUpperCase() + f.slice(1)}
             </button>
@@ -213,11 +239,10 @@ export default function AdminPage() {
                 <div className="flex justify-between items-start">
                   <div className="flex-grow">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className={`px-2 py-1 text-xs rounded ${
-                        event.status === 'pending'
+                      <span className={`px-2 py-1 text-xs rounded ${event.status === 'pending'
                           ? 'bg-yellow-100 text-yellow-800'
                           : 'bg-green-100 text-green-800'
-                      }`}>
+                        }`}>
                         {event.status}
                       </span>
                       <span className="text-sm text-gray-500">{event.type}</span>
@@ -262,15 +287,14 @@ export default function AdminPage() {
                     )}
                     <button
                       onClick={() => updateEvent(event.id, { pinned: !event.pinned })}
-                      className={`p-2 hover:bg-blue-50 rounded ${
-                        event.pinned ? 'text-blue-600' : 'text-gray-400'
-                      }`}
+                      className={`p-2 hover:bg-blue-50 rounded ${event.pinned ? 'text-blue-600' : 'text-gray-400'
+                        }`}
                       title="Toggle Pin"
                     >
                       <Pin size={20} />
                     </button>
                     <button
-                      onClick={() => {/* TODO: Edit modal */}}
+                      onClick={() => {/* TODO: Edit modal */ }}
                       className="p-2 text-gray-600 hover:bg-gray-50 rounded"
                       title="Edit"
                     >

@@ -1,16 +1,27 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
+import { verifyAdminToken } from '@/lib/auth'
 import type { Event } from '@/types'
 
 // This ensures the route is not statically generated
 export const dynamic = 'force-dynamic'
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const repo = searchParams.get('repo')
     const type = searchParams.get('type')
     const status = searchParams.get('status') || 'approved'
+
+    // Require authentication for non-approved status queries (admin operations)
+    if (status !== 'approved' || status.includes('pending')) {
+      if (!verifyAdminToken(request)) {
+        return NextResponse.json(
+          { error: 'Unauthorized. Admin authentication required.' },
+          { status: 401 }
+        )
+      }
+    }
 
     let query = supabase
       .from('events')
