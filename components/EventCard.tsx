@@ -1,6 +1,6 @@
 import { Event } from '@/types'
 import { formatDistanceToNow } from 'date-fns'
-import { GitCommit, GitPullRequest, Tag, Settings, AlertCircle } from 'lucide-react'
+import { GitCommit, GitPullRequest, Tag, Settings, AlertCircle, XCircle, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
 
 interface EventCardProps {
@@ -11,16 +11,20 @@ const eventIcons = {
   commit: GitCommit,
   release: Tag,
   pr_merge: GitPullRequest,
+  pr_closed: XCircle,
   repo_update: Settings,
   issue: AlertCircle,
+  issue_closed: CheckCircle,
 }
 
 const eventColors = {
   commit: 'text-blue-600',
   release: 'text-green-600',
   pr_merge: 'text-purple-600',
+  pr_closed: 'text-gray-600',
   repo_update: 'text-orange-600',
   issue: 'text-red-600',
+  issue_closed: 'text-green-600',
 }
 
 export default function EventCard({ event }: EventCardProps) {

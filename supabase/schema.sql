@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS repos (
 CREATE TABLE IF NOT EXISTS events (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   repo_id UUID REFERENCES repos(id) ON DELETE CASCADE,
-  type TEXT NOT NULL CHECK (type IN ('commit', 'release', 'pr_merge', 'repo_update')),
+  type TEXT NOT NULL CHECK (type IN ('commit', 'release', 'pr_merge', 'pr_closed', 'repo_update', 'issue', 'issue_closed')),
   title TEXT NOT NULL,
   summary TEXT NOT NULL,
   body TEXT,
