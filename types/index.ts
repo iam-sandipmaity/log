@@ -1,4 +1,4 @@
-export type EventType = 'commit' | 'release' | 'pr_merge' | 'repo_update' | 'issue'
+export type EventType = 'commit' | 'release' | 'pr_merge' | 'pr_closed' | 'repo_update' | 'issue' | 'issue_closed'
 export type EventStatus = 'pending' | 'approved' | 'rejected'
 
 export interface Repo {

@@ -34,11 +34,15 @@ export function normalizeGitHubEvent(event: string, payload: any) {
     case 'pull_request':
       if (payload.action === 'closed' && payload.pull_request.merged) {
         return normalizePRMergeEvent(payload)
+      } else if (payload.action === 'closed' && !payload.pull_request.merged) {
+        return normalizePRClosedEvent(payload)
       }
       return null
     case 'issues':
       if (payload.action === 'opened') {
         return normalizeIssueEvent(payload)
+      } else if (payload.action === 'closed') {
+        return normalizeIssueClosedEvent(payload)
       }
       return null
     default:
@@ -115,6 +119,38 @@ function normalizeIssueEvent(payload: any) {
     timestamp: issue.created_at,
     source_url: issue.html_url,
     tags: ['issue', ...extractTags(`${issue.title} ${issue.body || ''}`)],
+    status: 'approved',
+    pinned: false,
+  }
+}
+
+function normalizeIssueClosedEvent(payload: any) {
+  const issue = payload.issue
+
+  return {
+    type: 'issue_closed' as EventType,
+    title: `Issue #${issue.number} Closed: ${issue.title}`,
+    summary: issue.body?.slice(0, 300) || 'Issue resolved and closed',
+    body: issue.body || '',
+    timestamp: issue.closed_at,
+    source_url: issue.html_url,
+    tags: ['issue', 'closed', ...extractTags(`${issue.title} ${issue.body || ''}`)],
+    status: 'approved',
+    pinned: false,
+  }
+}
+
+function normalizePRClosedEvent(payload: any) {
+  const pr = payload.pull_request
+
+  return {
+    type: 'pr_closed' as EventType,
+    title: `PR #${pr.number} Declined: ${pr.title}`,
+    summary: pr.body?.slice(0, 300) || 'Pull request closed without merging',
+    body: pr.body || '',
+    timestamp: pr.closed_at,
+    source_url: pr.html_url,
+    tags: ['pr', 'declined', ...extractTags(`${pr.title} ${pr.body || ''}`)],
     status: 'approved',
     pinned: false,
   }
