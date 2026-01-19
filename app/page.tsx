@@ -17,8 +17,19 @@ export default function Home() {
     // Fetch available repos for the filter dropdown
     fetch('/api/repos')
       .then((res) => res.json())
-      .then((data) => setRepos(data))
-      .catch((err) => console.error('Failed to fetch repos:', err))
+      .then((data) => {
+        // Ensure data is an array before setting state
+        if (Array.isArray(data)) {
+          setRepos(data)
+        } else {
+          console.error('Invalid repos data:', data)
+          setRepos([])
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to fetch repos:', err)
+        setRepos([])
+      })
   }, [])
 
   return (

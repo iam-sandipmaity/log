@@ -13,6 +13,7 @@ export async function GET() {
       .select('repo_id')
 
     if (eventsError) {
+      console.error('Supabase error fetching events:', eventsError)
       return NextResponse.json({ error: eventsError.message }, { status: 500 })
     }
 
@@ -37,6 +38,7 @@ export async function GET() {
 
     return NextResponse.json(data || [])
   } catch (error) {
+    console.error('Error in GET /api/repos:', error)
     return NextResponse.json(
       { error: 'Failed to fetch repositories' },
       { status: 500 }

@@ -34,7 +34,7 @@ export default function Filters({
         className="px-4 py-2 rounded-full border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent bg-white"
       >
         <option value="">All Repositories</option>
-        {repos.map((repo) => (
+        {Array.isArray(repos) && repos.map((repo) => (
           <option key={repo.id} value={repo.id}>
             {repo.name}
           </option>

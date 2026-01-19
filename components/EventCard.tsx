@@ -77,6 +77,47 @@ export default function EventCard({ event }: EventCardProps) {
                 })}
               </time>
 
+              {/* Show commit SHA for commits */}
+              {event.type === 'commit' && event.source_url && (() => {
+                const commitMatch = event.source_url.match(/commit\/([a-f0-9]{7,40})/);
+                const compareMatch = event.source_url.match(/compare\/[^\.]+\.\.\.([a-f0-9]{7,40})/);
+                const sha = commitMatch?.[1] || compareMatch?.[1];
+                if (sha) {
+                  return (
+                    <span className="text-gray-500 font-mono text-xs">
+                      • {sha.substring(0, 7)}
+                    </span>
+                  );
+                }
+                return null;
+              })()}
+
+              {/* Show PR number for PRs */}
+              {(event.type === 'pr_merge' || event.type === 'pr_closed') && event.source_url && (() => {
+                const prMatch = event.source_url.match(/pull\/(\d+)/);
+                if (prMatch) {
+                  return (
+                    <span className="text-gray-500 font-mono text-xs">
+                      • #{prMatch[1]}
+                    </span>
+                  );
+                }
+                return null;
+              })()}
+
+              {/* Show issue number for issues */}
+              {(event.type === 'issue' || event.type === 'issue_closed') && event.source_url && (() => {
+                const issueMatch = event.source_url.match(/issues\/(\d+)/);
+                if (issueMatch) {
+                  return (
+                    <span className="text-gray-500 font-mono text-xs">
+                      • #{issueMatch[1]}
+                    </span>
+                  );
+                }
+                return null;
+              })()}
+
               {event.tags.length > 0 && (
                 <div className="flex gap-2">
                   {event.tags.map((tag) => (

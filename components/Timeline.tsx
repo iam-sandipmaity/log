@@ -26,9 +26,17 @@ export default function Timeline({ selectedRepo, selectedType }: TimelineProps) 
       const url = `/api/events${params.toString() ? '?' + params.toString() : ''}`
       const response = await fetch(url)
       const data = await response.json()
-      setEvents(data)
+      
+      // Ensure data is an array before setting state
+      if (Array.isArray(data)) {
+        setEvents(data)
+      } else {
+        console.error('Invalid events data:', data)
+        setEvents([])
+      }
     } catch (error) {
       console.error('Failed to fetch events:', error)
+      setEvents([])
     } finally {
       setLoading(false)
     }
